@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Online Shopping Prediction</title>
+    <script>
+        async function predict() {
+            try {
+                const data = {
+                    Administrative: parseInt(document.getElementById('Administrative').value),
+                    Administrative_Duration: parseFloat(document.getElementById('Administrative_Duration').value),
+                    Informational: parseInt(document.getElementById('Informational').value),
+                    Informational_Duration: parseFloat(document.getElementById('Informational_Duration').value),
+                    ProductRelated: parseInt(document.getElementById('ProductRelated').value),
+                    ProductRelated_Duration: parseFloat(document.getElementById('ProductRelated_Duration').value),
+                    BounceRates: parseFloat(document.getElementById('BounceRates').value),
+                    ExitRates: parseFloat(document.getElementById('ExitRates').value),
+                    PageValues: parseFloat(document.getElementById('PageValues').value),
+                    SpecialDay: parseFloat(document.getElementById('SpecialDay').value),
+                    Month: parseInt(document.getElementById('Month').value),
+                    OperatingSystems: parseInt(document.getElementById('OperatingSystems').value),
+                    Browser: parseInt(document.getElementById('Browser').value),
+                    Region: parseInt(document.getElementById('Region').value),
+                    TrafficType: parseInt(document.getElementById('TrafficType').value),
+                    VisitorType: parseInt(document.getElementById('VisitorType').value),
+                    Weekend: parseInt(document.getElementById('Weekend').value)
+                };
+
+                const response = await fetch('http://127.0.0.1:5000/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+
+                const result = await response.json();
+                if (result.error) {
+                    document.getElementById('result').innerText = `Error: ${result.error}`;
+                } else {
+                    document.getElementById('result').innerText = result.Revenue ? "Will Complete Purchase" : "Will Not Complete Purchase";
+                }
+            } catch (error) {
+                document.getElementById('result').innerText = `Error: ${error.message}`;
+                console.error('Error:', error);
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Online Shopping Prediction</h1>
+    <form onsubmit="event.preventDefault(); predict();">
+        <label>Administrative: <input type="number" id="Administrative"></label><br>
+        <label>Administrative Duration: <input type="number" step="0.01" id="Administrative_Duration"></label><br>
+        <label>Informational: <input type="number" id="Informational"></label><br>
+        <label>Informational Duration: <input type="number" step="0.01" id="Informational_Duration"></label><br>
+        <label>Product Related: <input type="number" id="ProductRelated"></label><br>
+        <label>Product Related Duration: <input type="number" step="0.01" id="ProductRelated_Duration"></label><br>
+        <label>Bounce Rates: <input type="number" step="0.01" id="BounceRates"></label><br>
+        <label>Exit Rates: <input type="number" step="0.01" id="ExitRates"></label><br>
+        <label>Page Values: <input type="number" step="0.01" id="PageValues"></label><br>
+        <label>Special Day: <input type="number" step="0.01" id="SpecialDay"></label><br>
+        <label>Month: <input type="number" id="Month"></label><br>
+        <label>Operating Systems: <input type="number" id="OperatingSystems"></label><br>
+        <label>Browser: <input type="number" id="Browser"></label><br>
+        <label>Region: <input type="number" id="Region"></label><br>
+        <label>Traffic Type: <input type="number" id="TrafficType"></label><br>
+        <label>Visitor Type: <input type="number" id="VisitorType"></label><br>
+        <label>Weekend: <input type="number" id="Weekend"></label><br>
+        <button type="submit">Predict</button>
+    </form>
+    <p id="result"></p>
+</body>
+</html>
