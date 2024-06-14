@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Online Shopping Prediction</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color:#00203f;
+        }
+        h1 {
+            text-align: center;
+            color: white;
+        }
+        form {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+        }
+        input[type="range"] {
+            width: 100%;
+        }
+        #result {
+            margin-top: 20px;
+        }
+        #result p {
+            margin: 5px 0;
+        }
+        /* input[type="range"] {
+            
+            writing-mode: bt-lr; 
+            width: 200px; 
+            height: 200px; 
+            margin: 10px; 
+            transform: rotate(270deg);
+            margin-bottom: 10px;
+        } 
+        */
+        .full {
+            width: 100%;
+            margin: 20px;
+            display: grid;
+            grid-template-columns: 2fr 2fr 2fr;          
+        }
+        .left {
+            position: initial;
+            padding: 20px;
+            background-color: #00203f;
+            color: white;
+            width: 250px;
+            height: 800px;
+        }
+        .right {
+            position: initial;
+            padding: 20px;
+            color: white;
+            background-color: #00203f;
+            width: 250px;
+            height: 800px;
+        }
+        #result{
+            position: initial;
+            padding: 20px;
+            background-color: #272727;
+            color: white;
+            margin-right: 20px;
+            position: fixed; 
+            margin-left: 800px;
+        }
+        button{
+            background-color: rgb(0, 200, 255);
+            border-color: rgb(0, 200, 255);
+            color: #00203f; 
+            padding: 10px 26px;
+            text-align: center; 
+            text-decoration: none; 
+            display: inline-block; 
+            font-size: 18px; 
+            margin: 4px 2px; 
+            cursor: pointer; 
+            border-radius: 8px; /* Rounded corners */
+        }
+        button:hover{
+            background-color:#00203f;
+            color:rgb(0, 200, 255);
+            border-color: rgb(0, 200, 255);
+        }
+    </style>
+    <script>
+        async function predict(data) {
+            try {
+                const response = await fetch('http://127.0.0.1:5000/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+
+                const result = await response.json();
+                if (result.error) {
+                    document.getElementById('result').innerText = `Error: ${result.error}`;
+                } else {
+                    document.getElementById('result').innerHTML = `
+                        <p>KNN: ${result.Model1_Revenue ? "Will Complete Purchase" : "Will Not Complete Purchase"}</p>
+                        <p>NBC: ${result.Model2_Revenue ? "Will Complete Purchase" : "Will Not Complete Purchase"}</p>
+                        <p>SVM: ${result.Model3_Revenue ? "Will Complete Purchase" : "Will Not Complete Purchase"}</p>
+                        <p>RF: ${result.Model4_Revenue ? "Will Complete Purchase" : "Will Not Complete Purchase"}</p>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('result').innerText = `Error: ${error.message}`;
+                console.error('Error:', error);
+            }
+        }
+
+        function updateSliderValue(sliderId, outputId) {
+            const slider = document.getElementById(sliderId);
+            const output = document.getElementById(outputId);
+            output.innerText = slider.value;
+            slider.oninput = function() {
+                output.innerText = this.value;
+            };
+        }
+
+        document.addEventListener('DOMContentLoaded', (event) => {
+            updateSliderValue('Administrative', 'AdministrativeValue');
+            updateSliderValue('Administrative_Duration', 'Administrative_DurationValue');
+            updateSliderValue('Informational', 'InformationalValue');
+            updateSliderValue('Informational_Duration', 'Informational_DurationValue');
+            updateSliderValue('ProductRelated', 'ProductRelatedValue');
+            updateSliderValue('ProductRelated_Duration', 'ProductRelated_DurationValue');
+            updateSliderValue('BounceRates', 'BounceRatesValue');
+            updateSliderValue('ExitRates', 'ExitRatesValue');
+            updateSliderValue('PageValues', 'PageValuesValue');
+            updateSliderValue('SpecialDay', 'SpecialDayValue');
+            updateSliderValue('Month', 'MonthValue');
+            updateSliderValue('OperatingSystems', 'OperatingSystemsValue');
+            updateSliderValue('Browser', 'BrowserValue');
+            updateSliderValue('Region', 'RegionValue');
+            updateSliderValue('TrafficType', 'TrafficTypeValue');
+            updateSliderValue('VisitorType', 'VisitorTypeValue');
+            updateSliderValue('Weekend', 'WeekendValue');
+        });
+
+        function handleSliderChange() {
+            const data = {
+                Administrative: parseInt(document.getElementById('Administrative').value),
+                Administrative_Duration: parseFloat(document.getElementById('Administrative_Duration').value),
+                Informational: parseInt(document.getElementById('Informational').value),
+                Informational_Duration: parseFloat(document.getElementById('Informational_Duration').value),
+                ProductRelated: parseInt(document.getElementById('ProductRelated').value),
+                ProductRelated_Duration: parseFloat(document.getElementById('ProductRelated_Duration').value),
+                BounceRates: parseFloat(document.getElementById('BounceRates').value),
+                ExitRates: parseFloat(document.getElementById('ExitRates').value),
+                PageValues: parseFloat(document.getElementById('PageValues').value),
+                SpecialDay: parseFloat(document.getElementById('SpecialDay').value),
+                Month: parseInt(document.getElementById('Month').value),
+                OperatingSystems: parseInt(document.getElementById('OperatingSystems').value),
+                Browser: parseInt(document.getElementById('Browser').value),
+                Region: parseInt(document.getElementById('Region').value),
+                TrafficType: parseInt(document.getElementById('TrafficType').value),
+                VisitorType: parseInt(document.getElementById('VisitorType').value),
+                Weekend: parseInt(document.getElementById('Weekend').value)
+            };
+
+            predict(data);
+        }
+
+        function randomizeSliders() {
+            const sliders = {
+                'Administrative': { min: 0, max: 10 },
+                'Administrative_Duration': { min: 0, max: 1000, step: 0.01 },
+                'Informational': { min: 0, max: 10 },
+                'Informational_Duration': { min: 0, max: 1000, step: 0.01 },
+                'ProductRelated': { min: 0, max: 100 },
+                'ProductRelated_Duration': { min: 0, max: 10000, step: 0.01 },
+                'BounceRates': { min: 0, max: 1, step: 0.01 },
+                'ExitRates': { min: 0, max: 1, step: 0.01 },
+                'PageValues': { min: 0, max: 100, step: 0.01 },
+                'SpecialDay': { min: 0, max: 1, step: 0.01 },
+                'Month': { min: 1, max: 12 },
+                'OperatingSystems': { min: 1, max: 8 },
+                'Browser': { min: 1, max: 13 },
+                'Region': { min: 1, max: 9 },
+                'TrafficType': { min: 1, max: 20 },
+                'VisitorType': { min: 0, max: 1 },
+                'Weekend': { min: 0, max: 1 }
+            };
+
+            Object.keys(sliders).forEach(sliderId => {
+                const slider = document.getElementById(sliderId);
+                const sliderConfig = sliders[sliderId];
+                const randomValue = (Math.random() * (sliderConfig.max - sliderConfig.min) + sliderConfig.min).toFixed(sliderConfig.step ? (sliderConfig.step.toString().split('.')[1] || []).length : 0);
+                slider.value = randomValue;
+                document.getElementById(`${sliderId}Value`).innerText = randomValue;
+            });
+        }
+    </script>
+</head>
+<body>
+    <h1>Online Shopping Prediction</h1>
+    <div class = "full">
+    <form oninput="handleSliderChange()">
+        <div class = "left">
+            <label>Administrative: <input type="range" id="Administrative" min="0" max="27" step="1"><span id="AdministrativeValue"></span></label><br>
+            <label>Administrative Duration: <input type="range" id="Administrative_Duration" min="0" max="3398.75" step="0.01"><span id="Administrative_DurationValue"></span></label><br>
+            <label>Informational: <input type="range" id="Informational" min="0" max="24" step="1"><span id="InformationalValue"></span></label><br>
+            <label>Informational Duration: <input type="range" id="Informational_Duration" min="0" max="2549.375" step="0.01"><span id="Informational_DurationValue"></span></label><br>
+            <label>Product Related: <input type="range" id="ProductRelated" min="0" max="705"><span id="ProductRelatedValue"></span></label><br>
+            <label>Product Related Duration: <input type="range" id="ProductRelated_Duration" min="0" max="63973.52223" step="0.01"><span id="ProductRelated_DurationValue"></span></label><br>
+            <label>Bounce Rates: <input type="range" id="BounceRates" min="0" max="0.2" step="0.01"><span id="BounceRatesValue"></span></label><br>
+            <label>Exit Rates: <input type="range" id="ExitRates" min="0" max="0.2" step="0.01"><span id="ExitRatesValue"></span></label><br>
+            <label>Page Values: <input type="range" id="PageValues" min="0" max="361.7637419" step="0.01"><span id="PageValuesValue"></span></label><br>
+        </div>
+    </form> 
+    <form oninput="handleSliderChange()">  
+        <div class="right">
+            <label>Special Day: <input type="range" id="SpecialDay" min="0" max="1" step="1"><span id="SpecialDayValue"></span></label><br>
+            <label>Month: <input type="range" id="Month" min="1" max="12" step="1"><span id="MonthValue"></span></label><br>
+            <label>Operating Systems: <input type="range" id="OperatingSystems" min="1" max="8"><span id="OperatingSystemsValue"></span></label><br>
+            <label>Browser: <input type="range" id="Browser" min="1" max="13"><span id="BrowserValue"></span></label><br>
+            <label>Region: <input type="range" id="Region" min="1" max="9"><span id="RegionValue"></span></label><br>
+            <label>Traffic Type: <input type="range" id="TrafficType" min="1" max="20"><span id="TrafficTypeValue"></span></label><br>
+            <label>Visitor Type: <input type="range" id="VisitorType" min="0" max="1"><span id="VisitorTypeValue"></span></label><br>
+            <label>Weekend: <input type="range" id="Weekend" min="0" max="1"><span id="WeekendValue"></span></label><br>
+            <button type="button" onclick="randomizeSliders(),handleSliderChange()">Randomize</button>
+        </div>
+    </form>
+    
+    <div id="result"></div>
+    </div>
+</body>
+</html>
+
