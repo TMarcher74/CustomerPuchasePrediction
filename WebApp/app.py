@@ -9,8 +9,13 @@ CORS(app)
 # Load all four models
 model1 = joblib.load('KNN.pkl')
 model2 = joblib.load('NBC.pkl')
-model3 = joblib.load('SVM.pkl')
-model4 = joblib.load('RF.pkl')
+model3 = joblib.load('SVM2.pkl')
+model4 = joblib.load('RF2.pkl')
+
+# model1 = joblib.load('knn_model.pkl')
+# model2 = joblib.load('mnb_model.pkl')
+# model3 = joblib.load('svc_model.pkl')
+# #model4 = joblib.load('rf_model.pkl')
 
 @app.route('/')
 def home():
